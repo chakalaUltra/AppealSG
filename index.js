@@ -1,4 +1,3 @@
-
 const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
 const http = require('http');
 
@@ -28,6 +27,9 @@ https://discord.gg/zFNRyHhvAm`;
 
 client.once('ready', () => {
     console.log(`✅ ${client.user.tag} is online!`);
+    
+    // Set bot activity/status
+    client.user.setActivity('.gg/shadow-garden', { type: 'CUSTOM' });
 });
 
 client.on('messageCreate', async (message) => {
@@ -46,15 +48,20 @@ client.on('messageCreate', async (message) => {
 
         if (!args[0]) return message.reply('❌ Please mention a user or provide a user ID.');
 
-        // Get target user immediately
+        // Only get mentioned user, ignore replied message
         const targetUser = message.mentions.users.first() || await client.users.fetch(args[0]).catch(() => null);
         if (!targetUser) return message.reply('❌ Invalid user mention or ID.');
 
-        // Send DM immediately without waiting for response
+        // Make sure we're not targeting the command author
+        if (targetUser.id === message.author.id) {
+            return message.reply('❌ You cannot ban yourself.');
+        }
+
+        // Send DM only to the mentioned/specified user
         targetUser.send(CUSTOM_MESSAGE).then(() => {
-            message.reply('**```✅ Appeal has been sent successfully```**');
+            message.reply(`**\`\`\`✅ Appeal sent to ${targetUser.tag}\`\`\`**`);
         }).catch(() => {
-            message.reply('**```❌ User has DMs off, couldn\'t sent appeal```**');
+            message.reply(`**\`\`\`❌ ${targetUser.tag} has DMs off, couldn't send appeal\`\`\`**`);
         });
     }
 });
@@ -83,3 +90,4 @@ const server = http.createServer((req, res) => {
 server.listen(5000, '0.0.0.0', () => {
     console.log('🌐 HTTP server running on port 5000 for cron job pinging');
 });
+
