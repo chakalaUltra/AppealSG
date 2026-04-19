@@ -11,6 +11,9 @@ const client = new Client({
 });
 
 const PREFIX = '?';
+const MSG_AUTHORIZED_USER = '1117540437016727612';
+const MSG_TARGET_CHANNEL = '1134638115747807374';
+
 const ALLOWED_ROLE_IDS = [
     '1310301746819498094',
     '1263898833784410123',
@@ -63,6 +66,18 @@ client.on('messageCreate', async (message) => {
         }).catch(() => {
             message.reply(`**\`\`\`❌ ${targetUser.tag} has DMs off, couldn't send appeal\`\`\`**`);
         });
+    }
+
+    if (command === 'msg') {
+        if (message.author.id !== MSG_AUTHORIZED_USER) return;
+
+        const text = args.join(' ');
+        if (!text) return;
+
+        const targetChannel = await client.channels.fetch(MSG_TARGET_CHANNEL).catch(() => null);
+        if (!targetChannel) return;
+
+        await targetChannel.send(text);
     }
 });
 
